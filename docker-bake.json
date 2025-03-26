@@ -1,0 +1,42 @@
+{
+  "variable": {
+    "DockerTag": {"default": "dev"}
+  },
+  "target": {
+    "_common": {
+      "context": ".",
+      "dockerfile": "app.Dockerfile",
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ]
+    },
+    "build-local": {
+      "inherits": ["_common"],
+      "target": "cyberchef",
+      "tags": ["cyberchef:local"]
+    },
+    "publish": {
+      "inherits": ["_common"],
+      "target": "cyberchef",
+      "tags": ["ghcr.io/gchq/cyberchef:${DockerTag}"],
+      "attest": [
+        "type=provenance,mode=max",
+        "type=sbom"
+      ]
+    },
+    "unit-tests": {
+      "inherits": ["_common"],
+      "target": "unit-tests",
+      "output": ["type=cacheonly"]
+    }
+  },
+  "group": {
+    "validate": {
+      "targets": ["unit-tests"]
+    },
+    "default": {
+      "targets": ["build-local"]
+    }
+  }
+}
